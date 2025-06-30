@@ -79,10 +79,14 @@ SNOWFLAKE_PAT_TOKEN = "<your-snowflake-pat-token>"
 TRUST3_AI_APP_API_KEY = "<your-trust3-ai-app-api-key>"
 
 # Trust3 App Setup
-trust3_ai_app = trust3_client.setup_app(
-    endpoint=TRUST3_SERVER_BASE_URL,
-    application_config_api_key=TRUST3_AI_APP_API_KEY,
-    snowflake_pat_token=SNOWFLAKE_PAT_TOKEN)
+if not st.session_state.get("trust3_ai_app", None):
+    trust3_ai_app = trust3_client.setup_app(
+        endpoint=TRUST3_SERVER_BASE_URL,
+        application_config_api_key=TRUST3_AI_APP_API_KEY,
+        snowflake_pat_token=SNOWFLAKE_PAT_TOKEN)
+    st.session_state["trust3_ai_app"] = trust3_ai_app
+
+trust3_ai_app = st.session_state.get("trust3_ai_app", None)
 
 def get_conversation_thread_id():
     # Get thread id from Trust3
