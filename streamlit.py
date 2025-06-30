@@ -308,6 +308,21 @@ def process_sse_response(response):
         
     return text, sql, citations
 
+def safeguarded_transcript_text(citations, thread_id, vector_db_info):
+    transcript_text = ""
+    for citation in citations:
+        doc_id = citation.get("doc_id", "")
+        if doc_id:
+            query = f"SELECT transcript_text FROM sales_conversations WHERE conversation_id = '{doc_id}'"
+            result = run_snowflake_query(query)
+            result_df = result.to_pandas()
+            if not result_df.empty:
+                transcript_text = result_df.iloc[0, 0]
+                _, safeguarded_transcript_text = safeguard_prompt_reply(transcript_text, ConversationType.REPLY, thread_id, vector_db_info)
+                citation["safeguarded_transcript_text"] = safeguarded_transcript_text
+            else:
+                transcript_text = "No transcript available"
+
 def main():
     st.title("Intelligent Sales Assistant")
 
@@ -339,37 +354,35 @@ def main():
             cortex_search_filter, vector_db_info = get_trust3_cortex_search_filter(thread_id)
             
             response = snowflake_api_call(query, 1, cortex_search_filter)
-            snowflake_text, snowflake_sql, snowflake_citations = process_sse_response(response)
-            text, sql, citations = get_trust3_safeguarded_response(snowflake_text, snowflake_sql, snowflake_citations, thread_id, vector_db_info)
+            text, sql, citations = process_sse_response(response)
 
             # Add assistant response to chat
             if text:
                 text = text.replace("【†", "[")
                 text = text.replace("†】", "]")
-                st.session_state.messages.append({"role": "assistant", "content": text})
+
+                safeguarded_transcript_text(citations, thread_id, vector_db_info)
+                
+                _, safeguarded_text = safeguard_prompt_reply(text, ConversationType.REPLY, thread_id)
+                st.session_state.messages.append({"role": "assistant", "content": safeguarded_text})
                 
                 with st.chat_message("assistant"):
-                    st.markdown(text.replace("•", "\n\n"))
+                    st.markdown(safeguarded_text.replace("•", "\n\n"))
                     if citations:
                         st.write("Citations:")
                         for citation in citations:
                             doc_id = citation.get("doc_id", "")
-                            if doc_id:
-                                query = f"SELECT transcript_text FROM sales_conversations WHERE conversation_id = '{doc_id}'"
-                                result = run_snowflake_query(query)
-                                result_df = result.to_pandas()
-                                if not result_df.empty:
-                                    transcript_text = result_df.iloc[0, 0]
-                                else:
-                                    transcript_text = "No transcript available"
-                    
-                                safeguarded_transcript_text, _, _ = get_trust3_safeguarded_response(transcript_text, "", "", thread_id)
+                            if doc_id and citation.get("safeguarded_transcript_text"):
                                 with st.expander(f"[{citation.get('source_id', '')}]"):
-                                    st.write(safeguarded_transcript_text)
+                                    st.write(citation.get("safeguarded_transcript_text"))
 
             # Display SQL if present
             if sql:
                 st.markdown("### Generated SQL")
+
+                # Making call here to audit the sql
+                safeguard_prompt_reply(sql, ConversationType.REPLY, thread_id)
+                
                 st.code(sql, language="sql")
                 sales_results = run_snowflake_query(sql)
                 if sales_results:
