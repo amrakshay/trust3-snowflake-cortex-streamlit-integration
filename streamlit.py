@@ -64,6 +64,7 @@ from paig_client import client as trust3_client
 from paig_client.model import ConversationType
 import paig_client.exception
 import uuid
+import ast
 
 # Get current user and its current role
 CURRENT_SNOWFLAKE_USER = st.experimental_user["user_name"].lower()
@@ -120,11 +121,11 @@ def get_trust3_safeguarded_query(query, thread_id):
     authorized, result = safeguard_prompt_reply(query, ConversationType.PROMPT, thread_id)
     return result
 
-def get_trust3_safeguarded_response(text, sql, citations, thread_id):
+def get_trust3_safeguarded_response(text, sql, citations, thread_id, vectorDBInfo=None):
     # Get safeguarded response from Trust3
-    def safeguard(content):
+    def safeguard(content, vector_db_info):
         if content:
-            authorized, result = safeguard_prompt_reply(content, ConversationType.REPLY, thread_id)
+            authorized, result = safeguard_prompt_reply(content, ConversationType.REPLY, thread_id, vector_db_info)
             if not authorized:
                 return False, result
             return True, result
@@ -133,9 +134,14 @@ def get_trust3_safeguarded_response(text, sql, citations, thread_id):
     inputs = [text, sql]
     safeguarded_outputs = []
 
+    is_vector_db_filter_sent = False
     for content in inputs:
         if content:
-            authorized, result = safeguard(content)
+            if not is_vector_db_filter_sent:
+                authorized, result = safeguard(content, vectorDBInfo)
+                is_vector_db_filter_sent = True
+            else:
+                authorized, result = safeguard(content, None)
             if not authorized:
                 return result, None, None
             safeguarded_outputs.append(result)
@@ -155,6 +161,25 @@ def audit_sql_dataframe(sql_dataframe, thread_id):
         thread_id=thread_id
     )
 
+def get_trust3_cortex_search_filter(thread_id):
+    with trust3_client.create_shield_context(application=trust3_ai_app, username=CURRENT_SNOWFLAKE_USER, use_external_groups=True, user_groups=[CURRENT_SNOWFLAKE_USER_ROLE]):
+        filter_response = trust3_client.get_vector_db_filter_expression(
+            thread_id=thread_id
+        )
+
+        filter_response_trimmed = filter_response.strip()
+
+        filter = None
+        vector_db_info = None
+        if filter_response_trimmed:
+            # By default, filter_response is a string. Convert it to a dictionary if required by your vector database
+            filter = ast.literal_eval(filter_response_trimmed)
+
+            # Object needed to pass to next reply safeguard call to audit the cortex search filter
+            vector_db_info = trust3_client.get_current("vectorDBInfo")
+        
+        return filter, vector_db_info
+
 # ================================ END TRUST3 SETUP AND HELPER FUNCTIONS ================================
 
 API_ENDPOINT = "/api/v2/cortex/agent:run"
@@ -173,7 +198,7 @@ def run_snowflake_query(query):
         st.error(f"Error executing SQL: {str(e)}")
         return None, None
 
-def snowflake_api_call(query: str, limit: int = 10):
+def snowflake_api_call(query: str, limit: int = 10, filter: dict = None):
     
     payload = {
         "model": "claude-4-sonnet",
@@ -211,6 +236,9 @@ def snowflake_api_call(query: str, limit: int = 10):
             }
         }
     }
+
+    if filter:
+        payload["tool_resources"]["search1"]["filter"] = filter
     
     try:
         resp = _snowflake.send_snow_api_request(
@@ -308,10 +336,12 @@ def main():
         
         # Get response from API
         with st.spinner("Processing your request..."):
-            response = snowflake_api_call(query, 1)
-            snowflake_text, snowflake_sql, snowflake_citations = process_sse_response(response)
-            text, sql, citations = get_trust3_safeguarded_response(snowflake_text, snowflake_sql, snowflake_citations, thread_id)
+            cortex_search_filter, vector_db_info = get_trust3_cortex_search_filter(thread_id)
             
+            response = snowflake_api_call(query, 1, cortex_search_filter)
+            snowflake_text, snowflake_sql, snowflake_citations = process_sse_response(response)
+            text, sql, citations = get_trust3_safeguarded_response(snowflake_text, snowflake_sql, snowflake_citations, thread_id, vector_db_info)
+
             # Add assistant response to chat
             if text:
                 text = text.replace("【†", "[")
