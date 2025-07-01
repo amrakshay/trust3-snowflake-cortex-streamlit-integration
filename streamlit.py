@@ -67,7 +67,7 @@ import uuid
 import ast
 
 # Get current user and its current role
-CURRENT_SNOWFLAKE_USER = st.experimental_user["user_name"].lower()
+CURRENT_SNOWFLAKE_USER = st.user["user_name"].lower()
 CURRENT_SNOWFLAKE_USER_ROLE = session.get_current_role().strip('"').lower()
 
 # Trust3 Setup
