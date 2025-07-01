@@ -58,11 +58,11 @@ Let’s get started!
 
 * Permissions to:
 
+  * Create roles
   * Create databases and tables
   * Upload files
   * Create external access integrations
   * Install applications from the Snowflake Marketplace
-* Refer to: **\[Snowflake Setup Guide]** (insert link if available)
 
 ### ✅ Access to Snowflake Cortex Services
 
