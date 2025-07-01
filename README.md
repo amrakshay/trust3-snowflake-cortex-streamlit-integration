@@ -331,9 +331,6 @@ You’ve successfully built a secure, AI-powered **Sales Assistant** that:
 
 ### 📚 Resources
 
-* 🔗 **[AI Trust Layer for Cortex – Snowflake Marketplace](https://www.snowflake.com/en/product/marketplace/)**
-  *Discover and install the Trust3 application directly from Snowflake Marketplace.*
-
 * 📘 **[Trust3 Documentation](https://docs.trust3.ai)**
   *Detailed guides, API references, and setup documentation.*
 
