@@ -1,12 +1,42 @@
-# Getting Started with Cortex Agents
+# Trust3 - Data Security & Compliance for Snowflake Cortex Apps
+
 ## Overview
-This project utilizes Snowflake Cortex Agents to analyze sales conversations and extract actionable insights. By leveraging semantic search and AI-driven analytics, the platform enables sales teams to gain deeper visibility into customer interactions, sales performance, and deal outcomes.
 
-The core functionalities include:
+This project demonstrates how to integrate **Trust3** with Snowflake Cortex to build secure, enterprise-grade AI applications. Trust3 provides centralized content moderation, fine-grained access controls, and comprehensive audit capabilities for AI systems built on the Snowflake Cortex platform.
 
-- Sales conversation analysis using Snowflake Cortex Search
-- Semantic search over sales data utilizing Cortex Analyst
-- Use Cortex Agents to use both under one API
+### What This Project Includes
 
-## Step-By-Step Guide
-For prerequisites, environment setup, and step-by-step instructions, please refer to the [QuickStart Guide](https://quickstarts.snowflake.com/guide/getting_started_with_cortex_agents/index.html?index=..%2F..index#0)
+- **Intelligent Sales Assistant**: A Streamlit application that uses Cortex Search and Cortex Analyst to analyze sales conversations and metrics
+- **Trust3 Security Integration**: Enterprise-grade security controls including:
+  - Automatic PII and content filtering
+  - Role-based access control with dynamic filtering
+  - Comprehensive audit logging and compliance reporting
+  - Real-time content moderation and policy enforcement
+
+### Key Features Demonstrated
+
+- **Content Moderation**: Automatically detect and manage sensitive content in AI interactions
+- **Access Control**: Role-based filtering ensures users only see data they're authorized to access
+- **Audit & Compliance**: Complete audit trails of all AI conversations and data access
+- **Dynamic Filtering**: Real-time access control based on user roles and group memberships
+
+## Quick Start Guide
+
+📖 **For complete setup instructions, prerequisites, and step-by-step configuration, please refer to:**
+
+**[Trust3 - Data Security & Compliance for Snowflake Cortex Apps.pdf](./Trust3%20-%20Data%20Security%20%26%20Compliance%20for%20Snowflake%20Cortex%20Apps.pdf)**
+
+The PDF guide includes:
+- Prerequisites and environment setup
+- Trust3 installation from Snowflake Marketplace  
+- Portal configuration and API key generation
+- Streamlit application deployment
+- Detailed use cases with screenshots
+- Troubleshooting and support resources
+
+## Support
+
+For technical support:
+- Review the complete PDF guide for detailed instructions
+- Visit [Trust3 Documentation](https://docs.trust3.ai)
+- Contact your Snowflake representative for Marketplace applications
