@@ -41,4 +41,3 @@ The PDF guide includes:
 For technical support:
 - Review the complete PDF guide for detailed instructions
 - Visit [Trust3 Documentation](https://docs.trust3.ai)
-- Contact your Snowflake representative for Marketplace applications
