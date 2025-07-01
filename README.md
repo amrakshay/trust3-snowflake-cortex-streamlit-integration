@@ -228,7 +228,19 @@ Once created:
 5. Enable the toggle for:
    `ALLOW_SNOWFLAKE_NATIVE_APPS_EAI`
 
-6. **Run the Streamlit application.**
+6. Click on the **Packages** dropdown in the top-left corner.
+   In the search field that appears, enter the following package names **one by one** and press **Enter** after each to install them into your environment:
+
+   * `urllib3`
+   * `cryptography`
+   * `posthog`
+   * `requests`
+   * `pyjwt`
+   * `jproperties`
+
+> 💡 Make sure each package is fully installed before proceeding to the next.
+
+7. **Run the Streamlit application.**
 
 ## 🔐 Safeguarding Cortex with Trust3
 
