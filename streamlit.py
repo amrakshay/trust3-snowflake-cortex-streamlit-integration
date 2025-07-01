@@ -19,7 +19,7 @@ def setup_python_packages():
     import zipfile
 
     # List of packages to install
-    list_of_packages = ["paig_common", "paig_client"]
+    list_of_packages = ["trust3_common", "trust3_client"]
 
     # Download packages from Snowflake stage
     for pkg in list_of_packages:
@@ -60,9 +60,9 @@ setup_python_packages()
 # ================================ START TRUST3 SETUP AND HELPER FUNCTIONS ================================
 
 # Trust3 Imports
-from paig_client import client as trust3_client
-from paig_client.model import ConversationType
-import paig_client.exception
+from trust3_client import client as trust3_guard_client
+from trust3_client.model import ConversationType
+import trust3_client.exception
 import uuid
 import ast
 
@@ -71,7 +71,7 @@ CURRENT_SNOWFLAKE_USER = st.experimental_user["user_name"].lower()
 CURRENT_SNOWFLAKE_USER_ROLE = session.get_current_role().strip('"').lower()
 
 # Trust3 Setup
-trust3_client.setup(frameworks=[])
+trust3_guard_client.setup(frameworks=[])
 
 # Trust3 Config
 TRUST3_SERVER_BASE_URL = "<your-trust3-server-base-url>"
@@ -80,7 +80,7 @@ TRUST3_AI_APP_API_KEY = "<your-trust3-ai-app-api-key>"
 
 # Trust3 App Setup
 if not st.session_state.get("trust3_ai_app", None):
-    trust3_ai_app = trust3_client.setup_app(
+    trust3_ai_app = trust3_guard_client.setup_app(
         endpoint=TRUST3_SERVER_BASE_URL,
         application_config_api_key=TRUST3_AI_APP_API_KEY,
         snowflake_pat_token=SNOWFLAKE_PAT_TOKEN)
@@ -101,17 +101,17 @@ def clean_error_message(message: str) -> str:
 
 def safeguard_prompt_reply(text, conversation_type, thread_id, vectorDBInfo=None):
     try:
-        with trust3_client.create_shield_context(application=trust3_ai_app, username=CURRENT_SNOWFLAKE_USER, 
+        with trust3_guard_client.create_shield_context(application=trust3_ai_app, username=CURRENT_SNOWFLAKE_USER, 
                                                  use_external_groups=True, user_groups=[CURRENT_SNOWFLAKE_USER_ROLE], 
                                                  vectorDBInfo=vectorDBInfo):
-            response = trust3_client.check_access(
+            response = trust3_guard_client.check_access(
                 text=text,
                 conversation_type=conversation_type,
                 thread_id=thread_id
             )
             return True, response[0].response_text
 
-    except paig_client.exception.AccessControlException as e:
+    except trust3_client.exception.AccessControlException as e:
         error_message = f"AccessControlException: {e}"
         prefix = "AccessControlException: ERROR: PAIG-400004: "
         if "denied" not in error_message.lower() and error_message.startswith(prefix):
@@ -166,8 +166,8 @@ def audit_sql_dataframe(sql_dataframe, thread_id):
     )
 
 def get_trust3_cortex_search_filter(thread_id):
-    with trust3_client.create_shield_context(application=trust3_ai_app, username=CURRENT_SNOWFLAKE_USER, use_external_groups=True, user_groups=[CURRENT_SNOWFLAKE_USER_ROLE]):
-        filter_response = trust3_client.get_vector_db_filter_expression(
+    with trust3_guard_client.create_shield_context(application=trust3_ai_app, username=CURRENT_SNOWFLAKE_USER, use_external_groups=True, user_groups=[CURRENT_SNOWFLAKE_USER_ROLE]):
+        filter_response = trust3_guard_client.get_vector_db_filter_expression(
             thread_id=thread_id
         )
 
@@ -180,7 +180,7 @@ def get_trust3_cortex_search_filter(thread_id):
             filter = ast.literal_eval(filter_response_trimmed)
 
             # Object needed to pass to next reply safeguard call to audit the cortex search filter
-            vector_db_info = trust3_client.get_current("vectorDBInfo")
+            vector_db_info = trust3_guard_client.get_current("vectorDBInfo")
         
         return filter, vector_db_info
 
