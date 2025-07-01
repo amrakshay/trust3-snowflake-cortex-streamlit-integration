@@ -26,6 +26,8 @@ This project demonstrates how to integrate **Trust3** with Snowflake Cortex to b
 
 **[Trust3 - Data Security & Compliance for Snowflake Cortex Apps.pdf](./Trust3%20-%20Data%20Security%20%26%20Compliance%20for%20Snowflake%20Cortex%20Apps.pdf)**
 
+> **Note:** All files referenced in the PDF guide (such as `sales_metrics_model.yaml`, `streamlit.py`, `trust3_common.zip`, and `trust3_client.zip`) are already available in this Git repository - no separate downloads required!
+
 The PDF guide includes:
 - Prerequisites and environment setup
 - Trust3 installation from Snowflake Marketplace  
