@@ -96,8 +96,7 @@ This script will:
 
 ### Step 2: Upload the Semantic Model
 
-1. Download the file `sales_metrics_model.yaml`
-   *(Avoid using right-click — use the download button to ensure proper file format.)*
+1. Download the file `sales_metrics_model.yaml` from the github repository.
 
 2. In Snowsight, go to:
    **Data → Databases → SALES\_INTELLIGENCE → DATA → Stages → MODELS**
@@ -187,7 +186,7 @@ Once created:
 
 ### Step 3: Upload Trust3 Python Packages to Snowflake
 
-1. Download the following ZIP files (Note: **Do NOT right-click to download**):
+1. Download the following ZIP files from the github repository:
 
    * `trust3_common.zip`
    * `trust3_client.zip`
@@ -212,7 +211,7 @@ Once created:
 
 ### Step 5: Configure the Streamlit Application
 
-1. Copy the contents from `streamlit.py` and paste it into your new Streamlit App.
+1. Copy the contents from `streamlit.py` from the github repository and paste it into your new Streamlit App.
 
 2. Replace the placeholders in the code with your actual values:
 
